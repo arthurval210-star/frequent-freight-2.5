@@ -1,0 +1,286 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>FREQUENT FREIGHT 2.5 — SA Metro LTL Prospects</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Archivo+Black&family=Archivo:wght@400;500;600;700&family=JetBrains+Mono:wght@400;600&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --bg:#0d1117; --panel:#141b24; --panel2:#1b2530; --line:#26333f;
+    --ink:#e9eef3; --muted:#7d8b99; --hi:#ff7a18; --hi2:#ffb454;
+    --green:#3fb950; --amber:#d29922; --red:#f85149; --cyan:#39a0ed;
+    --hazard:repeating-linear-gradient(45deg,#1b2530,#1b2530 12px,#15202b 12px,#15202b 24px);
+  }
+  *{box-sizing:border-box;margin:0;padding:0}
+  body{background:var(--bg);color:var(--ink);font-family:'Archivo',sans-serif;
+    background-image:radial-gradient(circle at 15% 0%,rgba(255,122,24,.06),transparent 40%),
+      radial-gradient(circle at 85% 100%,rgba(57,160,237,.05),transparent 40%);min-height:100vh}
+  .mono{font-family:'JetBrains Mono',monospace}
+  header{border-bottom:2px solid var(--hi);background:linear-gradient(180deg,#101720,#0d1117);
+    padding:18px 26px;display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:12px}
+  .brand{display:flex;align-items:center;gap:16px}
+  .truck{font-size:34px;filter:drop-shadow(0 0 8px rgba(255,122,24,.5))}
+  h1{font-family:'Archivo Black',sans-serif;font-size:1.5rem;letter-spacing:.5px;line-height:1}
+  h1 small{display:block;font-family:'JetBrains Mono';font-size:.62rem;color:var(--hi2);
+    letter-spacing:3px;margin-top:4px;font-weight:400}
+  .updated{font-size:.7rem;color:var(--muted)}
+  .updated b{color:var(--hi2)}
+
+  .stats{display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:14px;padding:22px 26px}
+  .stat{background:var(--panel);border:1px solid var(--line);border-left:3px solid var(--hi);
+    border-radius:6px;padding:14px 16px;position:relative;overflow:hidden}
+  .stat .k{font-family:'Archivo Black';font-size:2rem;line-height:1}
+  .stat .l{font-size:.66rem;letter-spacing:2px;color:var(--muted);text-transform:uppercase;margin-top:6px}
+  .stat.green{border-left-color:var(--green)} .stat.cyan{border-left-color:var(--cyan)}
+  .stat.amber{border-left-color:var(--amber)}
+
+  .controls{display:flex;gap:10px;flex-wrap:wrap;padding:0 26px 16px;align-items:center}
+  input,select{background:var(--panel2);border:1px solid var(--line);color:var(--ink);
+    padding:9px 12px;border-radius:5px;font-family:'JetBrains Mono';font-size:.78rem}
+  input:focus,select:focus{outline:none;border-color:var(--hi)}
+  input[type=search]{min-width:240px;flex:1}
+  .btn{background:var(--hi);color:#0d1117;border:none;padding:9px 16px;border-radius:5px;
+    font-family:'JetBrains Mono';font-weight:600;font-size:.74rem;cursor:pointer;letter-spacing:1px}
+  .btn:hover{background:var(--hi2)}
+  .btn.ghost{background:transparent;border:1px solid var(--line);color:var(--muted)}
+  .btn.ghost:hover{border-color:var(--hi);color:var(--ink)}
+
+  .wrap{padding:0 26px 40px}
+  .tablecard{background:var(--panel);border:1px solid var(--line);border-radius:8px;overflow:hidden}
+  .thead{background:var(--hazard);padding:10px 16px;display:flex;align-items:center;
+    justify-content:space-between;border-bottom:1px solid var(--line)}
+  .thead .ttl{font-family:'JetBrains Mono';font-size:.72rem;letter-spacing:2px;color:var(--hi2)}
+  table{width:100%;border-collapse:collapse;font-size:.82rem}
+  th{text-align:left;padding:11px 14px;font-family:'JetBrains Mono';font-size:.62rem;
+    letter-spacing:1px;color:var(--muted);text-transform:uppercase;border-bottom:1px solid var(--line);
+    cursor:pointer;white-space:nowrap;user-select:none}
+  th:hover{color:var(--hi2)}
+  td{padding:12px 14px;border-bottom:1px solid #1a232d;vertical-align:top}
+  tr:hover td{background:#161f29}
+  .co{font-weight:700;cursor:pointer} .co:hover{color:var(--hi2)}
+  .cat{display:inline-block;font-size:.6rem;letter-spacing:1px;background:#22303c;color:var(--cyan);
+    padding:2px 7px;border-radius:3px;margin-top:4px;font-family:'JetBrains Mono'}
+  .rev{font-family:'JetBrains Mono';font-weight:600;color:var(--green)}
+  a{color:var(--cyan);text-decoration:none} a:hover{text-decoration:underline}
+  .nosite{color:var(--muted);font-style:italic;font-size:.74rem}
+  .dm{font-weight:600} .dmt{font-size:.68rem;color:var(--hi2);font-family:'JetBrains Mono'}
+  .flag{display:inline-block;font-size:.56rem;letter-spacing:.5px;padding:2px 6px;border-radius:3px;
+    font-family:'JetBrains Mono';margin:2px 3px 0 0}
+  .f-need{background:#3a2410;color:var(--hi2)} .f-low{background:#2b2410;color:var(--amber)}
+  .chk{width:18px;height:18px;accent-color:var(--hi);cursor:pointer}
+  .empty{padding:50px;text-align:center;color:var(--muted);font-family:'JetBrains Mono'}
+  .pager{display:flex;justify-content:space-between;align-items:center;padding:12px 16px;
+    font-family:'JetBrains Mono';font-size:.72rem;color:var(--muted)}
+
+  /* modal */
+  .ov{position:fixed;inset:0;background:rgba(5,8,11,.82);display:none;align-items:center;
+    justify-content:center;padding:20px;z-index:50}
+  .ov.on{display:flex}
+  .modal{background:var(--panel);border:1px solid var(--hi);border-radius:10px;max-width:680px;
+    width:100%;max-height:88vh;overflow:auto}
+  .mh{position:sticky;top:0;background:var(--hazard);padding:16px 20px;display:flex;
+    justify-content:space-between;align-items:flex-start;border-bottom:1px solid var(--line)}
+  .mh h2{font-family:'Archivo Black';font-size:1.15rem}
+  .mclose{background:none;border:1px solid var(--line);color:var(--muted);padding:5px 10px;
+    border-radius:5px;cursor:pointer;font-family:'JetBrains Mono';font-size:.7rem}
+  .mb{padding:20px}
+  .row{display:flex;gap:10px;padding:9px 0;border-bottom:1px solid #1a232d}
+  .row .lab{width:150px;flex-shrink:0;font-family:'JetBrains Mono';font-size:.66rem;
+    letter-spacing:1px;color:var(--muted);text-transform:uppercase;padding-top:2px}
+  .row .val{flex:1;font-size:.86rem}
+  .pitch{background:var(--panel2);border:1px solid var(--line);border-left:3px solid var(--hi);
+    border-radius:6px;padding:14px;margin-top:14px;font-size:.9rem;line-height:1.5}
+  .pitch .pl{font-family:'JetBrains Mono';font-size:.62rem;letter-spacing:2px;color:var(--hi2);
+    display:block;margin-bottom:8px}
+  .interrupt{color:var(--hi);font-weight:700}
+  .basis{font-size:.7rem;color:var(--muted);font-style:italic}
+  footer{padding:18px 26px;border-top:1px solid var(--line);font-size:.68rem;color:var(--muted);
+    font-family:'JetBrains Mono';line-height:1.7}
+  .excl{color:var(--red)}
+</style>
+</head>
+<body>
+<header>
+  <div class="brand">
+    <span class="truck">🚛</span>
+    <h1>FREQUENT FREIGHT 2.5<small>SAN ANTONIO METRO · LTL SHIPPER PROSPECTS</small></h1>
+  </div>
+  <div class="updated">SCAN: <b id="updated">—</b><br>REV BAND: <b id="band">—</b></div>
+</header>
+
+<div class="stats">
+  <div class="stat"><div class="k" id="s-qual">0</div><div class="l">Qualified Leads</div></div>
+  <div class="stat green"><div class="k" id="s-dm">0</div><div class="l">With Decision-Maker</div></div>
+  <div class="stat cyan"><div class="k" id="s-email">0</div><div class="l">Real Email Found</div></div>
+  <div class="stat amber"><div class="k" id="s-approved">0</div><div class="l">Approved for Pipedrive</div></div>
+  <div class="stat"><div class="k" id="s-rej">0</div><div class="l">Rejected (QC)</div></div>
+</div>
+
+<div class="controls">
+  <input type="search" id="q" placeholder="search company / city / contact…" oninput="render()">
+  <select id="fcat" onchange="render()"><option value="">ALL CATEGORIES</option></select>
+  <select id="fcity" onchange="render()"><option value="">ALL CITIES</option></select>
+  <select id="fneed" onchange="render()">
+    <option value="">ALL</option>
+    <option value="ready">READY (full contact)</option>
+    <option value="need">NEEDS DM INFO</option>
+  </select>
+  <button class="btn ghost" onclick="resetF()">RESET</button>
+  <button class="btn" onclick="exportApproved()">⬇ EXPORT approved.json</button>
+</div>
+
+<div class="wrap">
+  <div class="tablecard">
+    <div class="thead">
+      <span class="ttl">▶ QUALIFIED FREIGHT/LTL PROSPECTS</span>
+      <span class="ttl" id="count">0 SHOWN</span>
+    </div>
+    <table>
+      <thead><tr>
+        <th style="width:34px">✓</th>
+        <th onclick="sortBy('company_name')">Company</th>
+        <th onclick="sortBy('est_revenue')">Est. Revenue ⇅</th>
+        <th>Address</th>
+        <th>Phone</th>
+        <th>Decision-Maker</th>
+        <th>Freight Reason</th>
+      </tr></thead>
+      <tbody id="tb"></tbody>
+    </table>
+    <div class="pager">
+      <span id="pginfo">—</span>
+      <span><button class="btn ghost" onclick="pg(-1)">◀ PREV</button>
+      <button class="btn ghost" onclick="pg(1)">NEXT ▶</button></span>
+    </div>
+  </div>
+</div>
+
+<footer>
+  WORKFLOW: review leads → tick APPROVE → EXPORT approved.json into <span class="mono">data/</span> →
+  run <span class="mono">python pipedrive_push.py --approved-only</span>. Nothing reaches Pipedrive
+  until you approve it.<br>
+  GATES: revenue $500K–$10M · SA-metro city · address + phone present · decision-maker present ·
+  <span class="excl">excludes logistics / 3PL / broker / freight / transportation companies</span> ·
+  short usable pitch. Revenue figures are signal-based ESTIMATES (see each lead's basis); emails &
+  DM names are scraped real data only — never invented.
+</footer>
+
+<div class="ov" id="ov" onclick="if(event.target===this)closeM()">
+  <div class="modal">
+    <div class="mh"><h2 id="m-name">—</h2><button class="mclose" onclick="closeM()">✕ CLOSE</button></div>
+    <div class="mb" id="m-body"></div>
+  </div>
+</div>
+
+<script>
+let LEADS=[], REJ=[], view=[], approved=new Set();
+let sortKey='est_revenue', sortDir=-1, page=1; const PER=15;
+
+async function load(){
+  try{
+    const d=await(await fetch('leads.json')).json();
+    LEADS=d.leads||[]; REJ=d.rejected_leads||[];
+    document.getElementById('updated').textContent=new Date(d.fetched_at)
+      .toLocaleString('en-US',{month:'short',day:'numeric',hour:'2-digit',minute:'2-digit'}).toUpperCase();
+    document.getElementById('band').textContent='$'+(d.revenue_band.min/1000)+'K – $'+(d.revenue_band.max/1e6)+'M';
+    document.getElementById('s-qual').textContent=LEADS.length;
+    document.getElementById('s-dm').textContent=LEADS.filter(l=>l.dm_name).length;
+    document.getElementById('s-email').textContent=LEADS.filter(l=>l.dm_email).length;
+    document.getElementById('s-rej').textContent=REJ.length;
+    LEADS.forEach(l=>{if(l.approved)approved.add(l.company_name)});
+    const cs=[...new Set(LEADS.map(l=>l.category))].sort();
+    cs.forEach(c=>{const o=document.createElement('option');o.value=c;o.textContent=c.toUpperCase();
+      document.getElementById('fcat').appendChild(o)});
+    const ct=[...new Set(LEADS.map(l=>l.city))].sort();
+    ct.forEach(c=>{const o=document.createElement('option');o.value=c;o.textContent=c.toUpperCase();
+      document.getElementById('fcity').appendChild(o)});
+    render();
+  }catch(e){
+    document.getElementById('tb').innerHTML='<tr><td colspan=7 class=empty>▶ NO leads.json FOUND<br><br>RUN: python fetch.py</td></tr>';
+  }
+}
+function sortBy(k){if(sortKey===k)sortDir*=-1;else{sortKey=k;sortDir=-1}render()}
+function pg(d){const m=Math.ceil(view.length/PER);page=Math.min(Math.max(1,page+d),m||1);draw()}
+function resetF(){document.getElementById('q').value='';document.getElementById('fcat').value='';
+  document.getElementById('fcity').value='';document.getElementById('fneed').value='';render()}
+
+function render(){
+  const q=document.getElementById('q').value.toLowerCase();
+  const fc=document.getElementById('fcat').value;
+  const fy=document.getElementById('fcity').value;
+  const fn=document.getElementById('fneed').value;
+  view=LEADS.filter(l=>{
+    if(q&&!((l.company_name||'').toLowerCase().includes(q)||(l.city||'').toLowerCase().includes(q)||(l.dm_name||'').toLowerCase().includes(q)))return false;
+    if(fc&&l.category!==fc)return false;
+    if(fy&&l.city!==fy)return false;
+    const needs=!l.dm_name||!l.dm_email;
+    if(fn==='ready'&&needs)return false;
+    if(fn==='need'&&!needs)return false;
+    return true;
+  });
+  view.sort((a,b)=>{let x=a[sortKey]??'',y=b[sortKey]??'';
+    if(typeof x==='string')x=x.toLowerCase();if(typeof y==='string')y=y.toLowerCase();
+    return x<y?sortDir:x>y?-sortDir:0});
+  page=1;document.getElementById('s-approved').textContent=approved.size;draw();
+}
+function money(n){return '$'+(n||0).toLocaleString()}
+function draw(){
+  const tb=document.getElementById('tb');
+  const sl=view.slice((page-1)*PER,page*PER);
+  document.getElementById('count').textContent=view.length+' SHOWN';
+  if(!sl.length){tb.innerHTML='<tr><td colspan=7 class=empty>▶ NO MATCHES</td></tr>';
+    document.getElementById('pginfo').textContent='—';return}
+  document.getElementById('pginfo').textContent='PAGE '+page+' / '+Math.ceil(view.length/PER);
+  tb.innerHTML=sl.map(l=>{
+    const idx=LEADS.indexOf(l);
+    const site=l.website?`<a href="${l.website}" target="_blank" rel="noopener">${l.website.replace(/^https?:\/\/(www\.)?/,'').slice(0,26)}</a>`:'<span class=nosite>no site</span>';
+    const dm=l.dm_name?`<span class=dm>${l.dm_name}</span>`:'<span class=nosite>name TBD</span>';
+    const flags=(l.flags||[]).map(f=>{
+      const c=f.includes('REVENUE')?'f-low':'f-need';
+      return `<span class="flag ${c}">${f.replace(/_/g,' ')}</span>`}).join('');
+    return `<tr>
+      <td><input type="checkbox" class="chk" ${approved.has(l.company_name)?'checked':''} onchange="tog(${idx})"></td>
+      <td><div class="co" onclick="openM(${idx})">${l.company_name}</div><div>${site}</div><span class="cat">${l.category}</span></td>
+      <td><span class="rev">${money(l.est_revenue)}</span></td>
+      <td>${l.address||'—'}</td>
+      <td class="mono" style="font-size:.78rem">${l.phone||'—'}</td>
+      <td>${dm}<div class="dmt">${l.dm_title||''}</div>${flags}</td>
+      <td style="max-width:240px;font-size:.78rem;color:#b8c4ce">${l.freight_reason||''}</td>
+    </tr>`}).join('');
+}
+function tog(i){const n=LEADS[i].company_name;approved.has(n)?approved.delete(n):approved.add(n);
+  document.getElementById('s-approved').textContent=approved.size}
+function openM(i){
+  const l=LEADS[i];document.getElementById('m-name').textContent=l.company_name;
+  const r=(lab,val)=>`<div class="row"><div class="lab">${lab}</div><div class="val">${val||'—'}</div></div>`;
+  const pitchHtml=l.pitch.replace(/^(.*?) — /,'<span class="interrupt">$1</span> — ');
+  document.getElementById('m-body').innerHTML=
+    r('Category',l.category)+
+    r('Website',l.website?`<a href="${l.website}" target="_blank">${l.website}</a>`:'—')+
+    r('Address',l.address)+
+    r('Phone',`<span class="mono">${l.phone}</span>`)+
+    r('Est. Revenue',`<span class="rev">${money(l.est_revenue)}</span><br><span class="basis">${l.revenue_basis||''}</span>`)+
+    r('What they do',l.description)+
+    r('Freight reason',l.freight_reason)+
+    '<div style="height:8px"></div>'+
+    r('Decision-Maker',l.dm_name||'<span class=nosite>scrape/verify name</span>')+
+    r('Title',l.dm_title)+
+    r('DM Email',l.dm_email?`<span class="mono">${l.dm_email}</span>`:'<span class=nosite>find direct email</span>')+
+    r('DM Phone',l.dm_phone?`<span class="mono">${l.dm_phone}</span>`:'—')+
+    `<div class="pitch"><span class="pl">▶ 10-SECOND COLD PITCH · pattern interrupt first</span>${pitchHtml}</div>`;
+  document.getElementById('ov').classList.add('on');
+}
+function closeM(){document.getElementById('ov').classList.remove('on')}
+function exportApproved(){
+  const arr=[...approved];
+  if(!arr.length){alert('No leads approved yet. Tick the ✓ column first.');return}
+  const blob=new Blob([JSON.stringify(arr,null,2)],{type:'application/json'});
+  const a=document.createElement('a');a.href=URL.createObjectURL(blob);a.download='approved.json';a.click();
+}
+document.addEventListener('keydown',e=>{if(e.key==='Escape')closeM()});
+load();
+</script>
+</body>
+</html>
