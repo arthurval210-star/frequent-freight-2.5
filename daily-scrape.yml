@@ -36,6 +36,7 @@ jobs:
         run: |
           git config user.name  "github-actions[bot]"
           git config user.email "github-actions[bot]@users.noreply.github.com"
-          git add data/leads.json dashboard/leads.json exports/
+          cp dashboard/leads.json leads.json
+          git add data/leads.json dashboard/leads.json leads.json exports/
           git diff --cached --quiet || git commit -m "chore: daily freight leads $(date -u '+%Y-%m-%d')"
           git push
