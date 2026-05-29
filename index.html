@@ -180,6 +180,148 @@ let sortKey='est_revenue', sortDir=-1, page=1; const PER=15;
 
 async function load(){
   try{
+    const d=await(await fetch('dashboard/leads.json')).json();
+    LEADS=d.leads||[]; REJ=d.rejected_leads||[];
+    document.getElementById('updated').textContent=new Date(d.fetched_at)
+      .toLocaleString('en-US',{month:'short',day:'numeric',hour:'2-digit',minute:'2-digit'}).toUpperCase();
+    document.getElementById('band').textContent='$'+(d.revenue_band.min/1000)+'K – $'+(d.revenue_band.max/1e6)+'M';
+    document.getElementById('s-qual').textContent=LEADS.length;
+    document.getElementById('s-dm').textContent=LEADS.filter(l=>l.dm_name).length;
+    document.getElementById('s-email').textContent=LEADS.filter(l=>l.dm_email).length;
+    document.getElementById('s-rej').textContent=REJ.length;
+    LEADS.forEach(l=>{if(l.approved)approved.add(l.company_name)});
+    const cs=[...new Set(LEADS.map(l=>l.category))].sort();
+    cs.forEach(c=>{const o=document.createElement('option');o.value=c;o.textContent=c.toUpperCase();
+      document.getElementById('fcat').appendChild(o)});
+    const ct=[...new Set(LEADS.map(l=>l.city))].sort();
+    ct.forEach(c=>{const o=document.createElement('option');o.value=c;o.textContent=c.toUpperCase();
+      document.getElementById('fcity').appendChild(o)});
+    render();
+  }catch(e){
+    document.getElementById('tb').innerHTML='<tr><td colspan=7 class=empty>▶ NO leads.json FOUND<br><br>RUN: python fetch.py</td></tr>';
+  }
+}
+function sortBy(k){if(sortKey===k)sortDir*=-1;else{sortKey=k;sortDir=-1}render()}
+function pg(d){const m=Math.ceil(view.length/PER);page=Math.min(Math.max(1,page+d),m||1);draw()}
+function resetF(){document.getElementById('q').value='';document.getElementById('fcat').value='';
+  document.getElementById('fcity').value='';document.getElementById('fneed').value='';render()}
+
+function render(){
+  const q=document.getElementById('q').value.toLowerCase();
+  const fc=document.getElementById('fcat').value;
+  const fy=document.getElementById('fcity').value;
+  const fn=document.getElementById('fneed').value;
+  view=LEADS.filter(l=>{
+    if(q&&!((l.company_name||'').toLowerCase().includes(q)||(l.city||'').toLowerCase().includes(q)||(l.dm_name||'').toLowerCase().includes(q)))return false;
+    if(fc&&l.category!==fc)return false;
+    if(fy&&l.city!==fy)return false;
+    const needs=!l.dm_name||!l.dm_email;
+    if(fn==='ready'&&needs)return false;
+    if(fn==='need'&&!needs)return false;
+    return true;
+  });
+  view.sort((a,b)=>{let x=a[sortKey]??'',y=b[sortKey]??'';
+    if(typeof x==='string')x=x.toLowerCase();if(typeof y==='string')y=y.toLowerCase();
+    return x<y?sortDir:x>y?-sortDir:0});
+  page=1;document.getElementById('s-approved').textContent=approved.size;draw();
+}
+function money(n){return '$'+(n||0).toLocaleString()}
+function draw(){
+  const tb=document.getElementById('tb');
+  const sl=view.slice((page-1)*PER,page*PER);
+  document.getElementById('count').textContent=view.length+' SHOWN';
+  if(!sl.length){tb.innerHTML='<tr><td colspan=7 class=empty>▶ NO MATCHES</td></tr>';
+    document.getElementById('pginfo').textContent='—';return}
+  document.getElementById('pginfo').textContent='PAGE '+page+' / '+Math.ceil(view.length/PER);
+  tb.innerHTML=sl.map(l=>{
+    const idx=LEADS.indexOf(l);
+    const site=l.website?`<a href="${l.website}" target="_blank" rel="noopener">${l.website.replace(/^https?:\/\/(www\.)?/,'').slice(0,26)}</a>`:'<span class=nosite>no site</span>';
+    const dm=l.dm_name?`<span class=dm>${l.dm_name}</span>`:'<span class=nosite>name TBD</span>';
+    const flags=(l.flags||[]).map(f=>{
+      const c=f.includes('REVENUE')?'f-low':'f-need';
+      return `<span class="flag ${c}">${f.replace(/_/g,' ')}</span>`}).join('');
+    return `<tr>
+      <td><input type="checkbox" class="chk" ${approved.has(l.company_name)?'checked':''} onchange="tog(${idx})"></td>
+      <td><div class="co" onclick="openM(${idx})">${l.company_name}</div><div>${site}</div><span class="cat">${l.category}</span></td>
+      <td><span class="rev">${money(l.est_revenue)}</span></td>
+      <td>${l.address||'—'}</td>
+      <td class="mono" style="font-size:.78rem">${l.phone||'—'}</td>
+      <td>${dm}<div class="dmt">${l.dm_title||''}</div>${flags}</td>
+      <td style="max-width:240px;font-size:.78rem;color:#b8c4ce">${l.freight_reason||''}</td>
+    </tr>`}).join('');
+}
+function tog(i){const n=LEADS[i].company_name;approved.has(n)?approved.delete(n):approved.add(n);
+  document.getElementById('s-approved').textContent=approved.size}
+function openM(i){
+  const l=LEADS[i];document.getElementById('m-name').textContent=l.company_name;
+  const r=(lab,val)=>`<div class="row"><div class="lab">${lab}</div><div class="val">${val||'—'}</div></div>`;
+  const pitchHtml=l.pitch.replace(/^(.*?) — /,'<span class="interrupt">$1</span> — ');
+  document.getElementById('m-body').innerHTML=
+    r('Category',l.category)+
+    r('Website',l.website?`<a href="${l.website}" target="_blank">${l.website}</a>`:'—')+
+    r('Address',l.address)+
+    r('Phone',`<span class="mono">${l.phone}</span>`)+
+    r('Est. Revenue',`<span class="rev">${money(l.est_revenue)}</span><br><span class="basis">${l.revenue_basis||''}</span>`)+
+    r('What they do',l.description)+
+    r('Freight reason',l.freight_reason)+
+    '<div style="height:8px"></div>'+
+    r('Decision-Maker',l.dm_name||'<span class=nosite>scrape/verify name</span>')+
+    r('Title',l.dm_title)+
+    r('DM Email',l.dm_email?`<span class="mono">${l.dm_email}</span>`:'<span class=nosite>find direct email</span>')+
+    r('DM Phone',l.dm_phone?`<span class="mono">${l.dm_phone}</span>`:'—')+
+    `<div class="pitch"><span class="pl">▶ 10-SECOND COLD PITCH · pattern interrupt first</span>${pitchHtml}</div>`;
+  document.getElementById('ov').classList.add('on');
+}
+function closeM(){document.getElementById('ov').classList.remove('on')}
+function exportApproved(){
+  const arr=[...approved];
+  if(!arr.length){alert('No leads approved yet. Tick the ✓ column first.');return}
+  const blob=new Blob([JSON.stringify(arr,null,2)],{type:'application/json'});
+  const a=document.createElement('a');a.href=URL.createObjectURL(blob);a.download='approved.json';a.click();
+}
+document.addEventListener('keydown',e=>{if(e.key==='Escape')closeM()});
+load();
+</script>
+</body>
+</html>        <th onclick="sortBy('est_revenue')">Est. Revenue ⇅</th>
+        <th>Address</th>
+        <th>Phone</th>
+        <th>Decision-Maker</th>
+        <th>Freight Reason</th>
+      </tr></thead>
+      <tbody id="tb"></tbody>
+    </table>
+    <div class="pager">
+      <span id="pginfo">—</span>
+      <span><button class="btn ghost" onclick="pg(-1)">◀ PREV</button>
+      <button class="btn ghost" onclick="pg(1)">NEXT ▶</button></span>
+    </div>
+  </div>
+</div>
+
+<footer>
+  WORKFLOW: review leads → tick APPROVE → EXPORT approved.json into <span class="mono">data/</span> →
+  run <span class="mono">python pipedrive_push.py --approved-only</span>. Nothing reaches Pipedrive
+  until you approve it.<br>
+  GATES: revenue $500K–$10M · SA-metro city · address + phone present · decision-maker present ·
+  <span class="excl">excludes logistics / 3PL / broker / freight / transportation companies</span> ·
+  short usable pitch. Revenue figures are signal-based ESTIMATES (see each lead's basis); emails &
+  DM names are scraped real data only — never invented.
+</footer>
+
+<div class="ov" id="ov" onclick="if(event.target===this)closeM()">
+  <div class="modal">
+    <div class="mh"><h2 id="m-name">—</h2><button class="mclose" onclick="closeM()">✕ CLOSE</button></div>
+    <div class="mb" id="m-body"></div>
+  </div>
+</div>
+
+<script>
+let LEADS=[], REJ=[], view=[], approved=new Set();
+let sortKey='est_revenue', sortDir=-1, page=1; const PER=15;
+
+async function load(){
+  try{
     const d=await(await fetch('leads.json')).json();
     LEADS=d.leads||[]; REJ=d.rejected_leads||[];
     document.getElementById('updated').textContent=new Date(d.fetched_at)
